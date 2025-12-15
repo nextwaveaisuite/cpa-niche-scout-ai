@@ -1,21 +1,31 @@
 import { NextResponse } from "next/server";
-import { callFull } from "@/lib/openai/client";
+import { callFull } from "../../../lib/openai/client";
 
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const { niche } = await req.json();
+  try {
+    const { niche } = await req.json();
 
-  const prompt = `
-Create a CPA site blueprint for niche: ${niche}.
-Include:
-- Homepage sections
+    if (!niche) {
+      return NextResponse.json({ error: "Niche required" }, { status: 400 });
+    }
+
+    const prompt = `
+Create a CPA website blueprint for niche "${niche}" including:
+- Page structure
 - Content plan
-- Monetization
-- Traffic strategy
+- Monetization strategy
+- Traffic plan
 `;
 
-  const result = await callFull(prompt);
+    const result = await callFull(prompt);
 
-  return NextResponse.json({ niche, result });
+    return NextResponse.json({ niche, blueprint: result });
+  } catch {
+    return NextResponse.json(
+      { error: "Blueprint generation failed" },
+      { status: 500 }
+    );
+  }
 }
