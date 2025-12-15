@@ -1,22 +1,32 @@
 import { NextResponse } from "next/server";
-import { callFull } from "@/lib/openai/client";
+import { callFull } from "../../../lib/openai/client";
 
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const { niche } = await req.json();
+  try {
+    const { niche } = await req.json();
 
-  const prompt = `
-You are a CPA strategist.
-For the niche "${niche}", suggest:
+    if (!niche) {
+      return NextResponse.json({ error: "Niche required" }, { status: 400 });
+    }
+
+    const prompt = `
+You are a CPA expert.
+For the niche "${niche}", provide:
 - Best CPA offer types
 - Traffic sources
 - Funnel angles
 - Compliance notes
-Format clean and structured.
 `;
 
-  const result = await callFull(prompt);
+    const result = await callFull(prompt);
 
-  return NextResponse.json({ niche, result });
+    return NextResponse.json({ niche, offers: result });
+  } catch {
+    return NextResponse.json(
+      { error: "Offer analysis failed" },
+      { status: 500 }
+    );
+  }
 }
