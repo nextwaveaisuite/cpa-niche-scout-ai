@@ -11,49 +11,57 @@ export default function Dashboard() {
 
   async function run(endpoint: string, label: string) {
     setLoading(true);
-    setTitle(label);
+    setTitle("");
     setContent("");
 
-    try {
-      const res = await fetch(`/api/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ niche }),
-      });
+    const res = await fetch(`/api/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ niche }),
+    });
 
-      const json = await res.json();
+    const json = await res.json();
 
-      const value =
-        json.quick_score ??
-        json.keywords ??
-        json.offers ??
-        json.domains ??
-        json.blueprint ??
-        json.video_script ??
-        json.deep_analysis ??
-        JSON.stringify(json, null, 2);
+    setTitle(label);
 
-      setContent(value);
-    } catch {
-      setContent("Error loading data.");
-    }
+    const value =
+      json.quick_score ||
+      json.keywords ||
+      json.offers ||
+      json.domains ||
+      json.blueprint ||
+      json.deep_analysis ||
+      "No data returned";
 
+    setContent(value);
     setLoading(false);
   }
 
-  async function upgrade() {
+  function copyToClipboard() {
+    navigator.clipboard.writeText(content);
+    alert("Copied to clipboard");
+  }
+
+  function exportToTxt() {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title || "result"}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function upgradeToPro() {
     const res = await fetch("/api/checkout", { method: "POST" });
     const data = await res.json();
-    window.location.href = data.url;
+    if (data.url) window.location.href = data.url;
   }
 
   return (
     <div className="container">
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <Link
-          href="/"
-          style={{ color: "#00ff9c", textDecoration: "none", fontWeight: 600 }}
-        >
+        <Link href="/" style={{ color: "#00ff9c", fontWeight: 600 }}>
           ← Back to Home
         </Link>
       </div>
@@ -75,21 +83,29 @@ export default function Dashboard() {
         <button onClick={() => run("offers", "Offers")}>Offers</button>
         <button onClick={() => run("domains", "Domains")}>Domains</button>
         <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
-        <button onClick={() => run("video", "Video Script")}>
+        <button onClick={() => run("video-script", "Video Script")}>
           Video Script
         </button>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={upgrade}>Upgrade to Pro</button>
-      </div>
+      <button onClick={upgradeToPro} style={{ marginTop: "20px" }}>
+        Upgrade to Pro
+      </button>
 
       {loading && <p>Loading…</p>}
 
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
-          <pre className="content">{content}</pre>
+
+          <div style={{ marginBottom: "10px" }}>
+            <button onClick={copyToClipboard}>Copy</button>
+            <button onClick={exportToTxt} style={{ marginLeft: "10px" }}>
+              Export
+            </button>
+          </div>
+
+          <div className="content">{content}</div>
         </div>
       )}
     </div>
