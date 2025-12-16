@@ -5,43 +5,46 @@ import Link from "next/link";
 
 export default function Dashboard() {
   const [niche, setNiche] = useState("");
-  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
-  async function run(type: string) {
-    if (!niche) return;
+  async function run(endpoint: string, label: string) {
     setLoading(true);
-    setResult(null);
+    setTitle("");
+    setContent("");
 
-    try {
-      const res = await fetch(`/api/${type}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ niche }),
-      });
-      const data = await res.json();
-      setResult(data);
-    } catch {
-      setResult({ error: "Analysis failed" });
-    }
+    const res = await fetch(`/api/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ niche }),
+    });
 
+    const json = await res.json();
+
+    setTitle(label);
+
+    const value =
+      json.quick_score ||
+      json.keywords ||
+      json.offers ||
+      json.domains ||
+      json.blueprint ||
+      json.deep_analysis ||
+      "No data returned";
+
+    setContent(value);
     setLoading(false);
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "40px",
-        textAlign: "center",
-      }}
-    >
-      {/* Back button */}
-      <div style={{ marginBottom: "20px" }}>
+    <div className="container">
+      {/* Back Button */}
+      <div style={{ textAlign: "left", marginBottom: "20px" }}>
         <Link
           href="/"
           style={{
-            color: "#facc15",
+            color: "#00ff9c",
             textDecoration: "none",
             fontWeight: 600,
           }}
@@ -51,76 +54,31 @@ export default function Dashboard() {
       </div>
 
       <h1>
-        <span className="header-green">CPA Niche</span>{" "}
-        <span className="header-yellow">Scout AI</span>
+        <span className="header-green">CPA Niche Scout AI</span>
       </h1>
 
-      <p style={{ color: "#9ca3af", marginTop: "10px" }}>
-        Enter a niche and run instant CPA intelligence.
-      </p>
-
       <input
+        placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
         value={niche}
         onChange={(e) => setNiche(e.target.value)}
-        placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
-        style={{
-          marginTop: "20px",
-          padding: "14px",
-          width: "100%",
-          maxWidth: "420px",
-          borderRadius: "6px",
-          border: "1px solid #1f2933",
-          background: "#0b0f14",
-          color: "#e5e7eb",
-        }}
       />
 
-      <div style={{ marginTop: "20px" }}>
-        {["analyze", "keywords", "offers", "domains", "blueprint"].map(
-          (t) => (
-            <button
-              key={t}
-              onClick={() => run(t)}
-              style={{
-                margin: "6px",
-                padding: "10px 14px",
-                background: "#111827",
-                color: "#00ff9c",
-                border: "1px solid #1f2933",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-            >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          )
-        )}
+      <div>
+        <button onClick={() => run("analyze", "Analysis")}>Analyze</button>
+        <button onClick={() => run("keywords", "Keywords")}>Keywords</button>
+        <button onClick={() => run("offers", "Offers")}>Offers</button>
+        <button onClick={() => run("domains", "Domains")}>Domains</button>
+        <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
       </div>
 
-      {loading && (
-        <p style={{ marginTop: "20px", color: "#facc15" }}>
-          Running analysis…
-        </p>
-      )}
+      {loading && <p>Loading…</p>}
 
-      {result && (
-        <pre
-          style={{
-            marginTop: "30px",
-            background: "#020617",
-            padding: "20px",
-            borderRadius: "8px",
-            textAlign: "left",
-            maxWidth: "900px",
-            marginInline: "auto",
-            overflowX: "auto",
-            color: "#e5e7eb",
-            fontSize: "14px",
-          }}
-        >
-          {JSON.stringify(result, null, 2)}
-        </pre>
+      {content && (
+        <div className="result-box">
+          <div className="section-title">{title}</div>
+          <div className="content">{content}</div>
+        </div>
       )}
-    </main>
+    </div>
   );
 }
