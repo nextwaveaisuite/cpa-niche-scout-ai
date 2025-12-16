@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16", // ✅ FIXED (must match SDK)
+  apiVersion: "2023-10-16",
 });
 
 export async function POST() {
@@ -18,14 +18,14 @@ export async function POST() {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=1`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=1`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?pro=1`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err.message || "Stripe checkout failed" },
+      { error: err.message },
       { status: 500 }
     );
   }
