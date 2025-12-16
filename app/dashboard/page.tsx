@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 export default function Dashboard() {
@@ -8,37 +8,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [lastEndpoint, setLastEndpoint] = useState<string | null>(null);
-  const [lastLabel, setLastLabel] = useState<string | null>(null);
 
-  /* ============================
-     RESTORE SESSION + AUTO-RUN
-     ============================ */
-  useEffect(() => {
-    const saved = localStorage.getItem("cpa_niche_scout_session");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setNiche(data.niche || "");
-      setTitle(data.title || "");
-      setContent(data.content || "");
-      setLastEndpoint(data.endpoint || null);
-      setLastLabel(data.label || null);
-
-      if (data.niche && data.endpoint && data.label) {
-        run(data.endpoint, data.label, true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function run(endpoint: string, label: string, silent = false) {
-    if (!niche || loading) return;
-
-    if (!silent) {
-      setLoading(true);
-      setTitle("");
-      setContent("");
-    }
+  async function run(endpoint: string, label: string) {
+    setLoading(true);
+    setTitle("");
+    setContent("");
 
     const res = await fetch(`/api/${endpoint}`, {
       method: "POST",
@@ -47,6 +21,8 @@ export default function Dashboard() {
     });
 
     const json = await res.json();
+
+    setTitle(label);
 
     const value =
       json.quick_score ||
@@ -57,65 +33,51 @@ export default function Dashboard() {
       json.deep_analysis ||
       "No data returned";
 
-    setTitle(label);
     setContent(value);
-    setLastEndpoint(endpoint);
-    setLastLabel(label);
     setLoading(false);
-
-    localStorage.setItem(
-      "cpa_niche_scout_session",
-      JSON.stringify({
-        niche,
-        endpoint,
-        label,
-        title: label,
-        content: value,
-      })
-    );
   }
 
   /* ============================
-     ENTER KEY → ANALYZE
+     READABILITY FORMATTER
+     (logic only – no styling)
      ============================ */
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      run("analyze", "Analysis");
-    }
-  }
+  function renderFormattedContent(text: string) {
+    return text.split("\n").map((line, i) => {
+      if (line.startsWith("###")) {
+        return <h3 key={i}>{line.replace("###", "").trim()}</h3>;
+      }
 
-  /* ============================
-     COPY RESULT (LOGIC ONLY)
-     ============================ */
-  function copyResult() {
-    if (!content) return;
-    navigator.clipboard.writeText(
-      typeof content === "string"
-        ? content
-        : JSON.stringify(content, null, 2)
-    );
-  }
+      if (line.startsWith("##")) {
+        return <h2 key={i}>{line.replace("##", "").trim()}</h2>;
+      }
 
-  /* ============================
-     EXPORT RESULT (LOGIC ONLY)
-     ============================ */
-  function exportResult() {
-    if (!content) return;
+      if (line.startsWith("- ")) {
+        return <li key={i}>{line.replace("- ", "")}</li>;
+      }
 
-    const text =
-      typeof content === "string"
-        ? content
-        : JSON.stringify(content, null, 2);
+      if (line.includes("|") && line.includes("---")) {
+        return null; // skip markdown table separators
+      }
 
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
+      if (line.includes("|")) {
+        const cells = line
+          .split("|")
+          .map((c) => c.trim())
+          .filter(Boolean);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title || "result"}.txt`;
-    a.click();
+        return (
+          <div key={i}>
+            {cells.map((cell, idx) => (
+              <span key={idx} style={{ marginRight: "12px" }}>
+                {cell}
+              </span>
+            ))}
+          </div>
+        );
+      }
 
-    URL.revokeObjectURL(url);
+      return <p key={i}>{line}</p>;
+    });
   }
 
   return (
@@ -143,38 +105,24 @@ export default function Dashboard() {
         placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
         value={niche}
         onChange={(e) => setNiche(e.target.value)}
-        onKeyDown={handleKeyDown}
       />
 
       <div>
-        <button disabled={loading} onClick={() => run("analyze", "Analysis")}>
-          Analyze
-        </button>
-        <button disabled={loading} onClick={() => run("keywords", "Keywords")}>
-          Keywords
-        </button>
-        <button disabled={loading} onClick={() => run("offers", "Offers")}>
-          Offers
-        </button>
-        <button disabled={loading} onClick={() => run("domains", "Domains")}>
-          Domains
-        </button>
-        <button disabled={loading} onClick={() => run("blueprint", "Blueprint")}>
-          Blueprint
-        </button>
+        <button onClick={() => run("analyze", "Analysis")}>Analyze</button>
+        <button onClick={() => run("keywords", "Keywords")}>Keywords</button>
+        <button onClick={() => run("offers", "Offers")}>Offers</button>
+        <button onClick={() => run("domains", "Domains")}>Domains</button>
+        <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
       </div>
 
       {loading && <p>Loading…</p>}
 
       {content && (
         <div className="result-box">
-          <div className="section-title">
-            {title}
-            <button onClick={copyResult}>Copy</button>
-            <button onClick={exportResult}>Export</button>
+          <div className="section-title">{title}</div>
+          <div className="content">
+            {renderFormattedContent(content)}
           </div>
-
-          <div className="content">{content}</div>
         </div>
       )}
     </div>
