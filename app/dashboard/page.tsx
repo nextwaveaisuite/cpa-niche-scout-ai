@@ -10,6 +10,8 @@ export default function Dashboard() {
   const [content, setContent] = useState("");
 
   async function run(endpoint: string, label: string) {
+    if (!niche.trim()) return;
+
     setLoading(true);
     setTitle("");
     setContent("");
@@ -21,6 +23,16 @@ export default function Dashboard() {
     });
 
     const json = await res.json();
+
+    // ✅ PHASE 2: Soft Monetization Gate (LOGIC ONLY)
+    if (json.error) {
+      setTitle("Limit Reached");
+      setContent(
+        "⚠️ You’ve reached today’s free usage limit.\n\nUpgrade to unlock unlimited niche research, deeper insights, and advanced features."
+      );
+      setLoading(false);
+      return;
+    }
 
     setTitle(label);
 
@@ -34,88 +46,6 @@ export default function Dashboard() {
       "No data returned";
 
     setContent(value);
-    setLoading(false);
-  }
-
-  /* ============================
-     READABILITY FORMATTER
-     ============================ */
-  function renderFormattedContent(text: string) {
-    return text.split("\n").map((line, i) => {
-      if (line.startsWith("###")) {
-        return <h3 key={i}>{line.replace("###", "").trim()}</h3>;
-      }
-
-      if (line.startsWith("##")) {
-        return <h2 key={i}>{line.replace("##", "").trim()}</h2>;
-      }
-
-      if (line.startsWith("- ")) {
-        return <li key={i}>{line.replace("- ", "")}</li>;
-      }
-
-      if (line.includes("|") && line.includes("---")) {
-        return null;
-      }
-
-      if (line.includes("|")) {
-        const cells = line
-          .split("|")
-          .map((c) => c.trim())
-          .filter(Boolean);
-
-        return (
-          <div key={i}>
-            {cells.map((cell, idx) => (
-              <span key={idx} style={{ marginRight: "12px" }}>
-                {cell}
-              </span>
-            ))}
-          </div>
-        );
-      }
-
-      return <p key={i}>{line}</p>;
-    });
-  }
-
-  /* ============================
-     MICRO ACTIONS
-     ============================ */
-  function copyToClipboard() {
-    navigator.clipboard.writeText(content);
-  }
-
-  function exportTxt() {
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title || "cpa-niche-result"}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  /* ============================
-     VIDEO HOOK (CONTEXTUAL)
-     ============================ */
-  async function generateVideoHook() {
-    setLoading(true);
-
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        niche,
-        context: content,
-        mode: "video_hook",
-      }),
-    });
-
-    const json = await res.json();
-
-    setTitle("60-Second YouTube Hook");
-    setContent(json.video_hook || "No hook generated");
     setLoading(false);
   }
 
@@ -144,14 +74,27 @@ export default function Dashboard() {
         placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
         value={niche}
         onChange={(e) => setNiche(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") run("analyze", "Analysis");
+        }}
       />
 
       <div>
-        <button onClick={() => run("analyze", "Analysis")}>Analyze</button>
-        <button onClick={() => run("keywords", "Keywords")}>Keywords</button>
-        <button onClick={() => run("offers", "Offers")}>Offers</button>
-        <button onClick={() => run("domains", "Domains")}>Domains</button>
-        <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
+        <button disabled={loading} onClick={() => run("analyze", "Analysis")}>
+          Analyze
+        </button>
+        <button disabled={loading} onClick={() => run("keywords", "Keywords")}>
+          Keywords
+        </button>
+        <button disabled={loading} onClick={() => run("offers", "Offers")}>
+          Offers
+        </button>
+        <button disabled={loading} onClick={() => run("domains", "Domains")}>
+          Domains
+        </button>
+        <button disabled={loading} onClick={() => run("blueprint", "Blueprint")}>
+          Blueprint
+        </button>
       </div>
 
       {loading && <p>Loading…</p>}
@@ -159,19 +102,7 @@ export default function Dashboard() {
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
-
-          {/* Action Buttons */}
-          <div style={{ marginBottom: "10px" }}>
-            <button onClick={copyToClipboard}>Copy</button>
-            <button onClick={exportTxt}>Export</button>
-            <button onClick={generateVideoHook}>
-              🎬 60s Video Hook
-            </button>
-          </div>
-
-          <div className="content">
-            {renderFormattedContent(content)}
-          </div>
+          <div className="content">{content}</div>
         </div>
       )}
     </div>
