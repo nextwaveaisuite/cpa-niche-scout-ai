@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [lastEndpoint, setLastEndpoint] = useState<string | null>(null);
+  const [lastLabel, setLastLabel] = useState<string | null>(null);
 
   /* ============================
      RESTORE SESSION + AUTO-RUN
@@ -21,8 +22,8 @@ export default function Dashboard() {
       setTitle(data.title || "");
       setContent(data.content || "");
       setLastEndpoint(data.endpoint || null);
+      setLastLabel(data.label || null);
 
-      // Auto-run last module if possible
       if (data.niche && data.endpoint && data.label) {
         run(data.endpoint, data.label, true);
       }
@@ -31,7 +32,7 @@ export default function Dashboard() {
   }, []);
 
   async function run(endpoint: string, label: string, silent = false) {
-    if (!niche) return;
+    if (!niche || loading) return;
 
     if (!silent) {
       setLoading(true);
@@ -59,20 +60,28 @@ export default function Dashboard() {
     setTitle(label);
     setContent(value);
     setLastEndpoint(endpoint);
+    setLastLabel(label);
     setLoading(false);
 
-    /* ============================
-       SAVE SESSION
-       ============================ */
     localStorage.setItem(
       "cpa_niche_scout_session",
       JSON.stringify({
         niche,
         endpoint,
         label,
+        title: label,
         content: value,
       })
     );
+  }
+
+  /* ============================
+     ENTER KEY → ANALYZE
+     ============================ */
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      run("analyze", "Analysis");
+    }
   }
 
   /* ============================
@@ -134,14 +143,25 @@ export default function Dashboard() {
         placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
         value={niche}
         onChange={(e) => setNiche(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
 
       <div>
-        <button onClick={() => run("analyze", "Analysis")}>Analyze</button>
-        <button onClick={() => run("keywords", "Keywords")}>Keywords</button>
-        <button onClick={() => run("offers", "Offers")}>Offers</button>
-        <button onClick={() => run("domains", "Domains")}>Domains</button>
-        <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
+        <button disabled={loading} onClick={() => run("analyze", "Analysis")}>
+          Analyze
+        </button>
+        <button disabled={loading} onClick={() => run("keywords", "Keywords")}>
+          Keywords
+        </button>
+        <button disabled={loading} onClick={() => run("offers", "Offers")}>
+          Offers
+        </button>
+        <button disabled={loading} onClick={() => run("domains", "Domains")}>
+          Domains
+        </button>
+        <button disabled={loading} onClick={() => run("blueprint", "Blueprint")}>
+          Blueprint
+        </button>
       </div>
 
       {loading && <p>Loading…</p>}
