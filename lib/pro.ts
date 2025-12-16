@@ -1,2 +1,2 @@
-export const IS_PRO = false; 
-// flip to true later via Stripe, license, Whop, etc.
+export const IS_PRO = false;
+// later this flips via Stripe / license / webhook
