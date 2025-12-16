@@ -14,40 +14,31 @@ export default function Dashboard() {
     setTitle("");
     setContent("");
 
-    try {
-      const res = await fetch(`/api/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ niche }),
-      });
+    const res = await fetch(`/api/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ niche }),
+    });
 
-      const json = await res.json();
+    const json = await res.json();
 
-      const value =
-        json.quick_score ||
-        json.keywords ||
-        json.offers ||
-        json.domains ||
-        json.blueprint ||
-        json.video ||
-        "No data returned";
+    const value =
+      json.quick_score ||
+      json.keywords ||
+      json.offers ||
+      json.domains ||
+      json.blueprint ||
+      json.script ||
+      "No data returned";
 
-      setTitle(label);
-      setContent(value);
-    } catch (e) {
-      setTitle("Error");
-      setContent("Request failed");
-    }
-
+    setTitle(label);
+    setContent(value);
     setLoading(false);
   }
 
   async function upgradeToPro() {
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-      });
-
+      const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json();
 
       if (!data.url) {
@@ -56,14 +47,13 @@ export default function Dashboard() {
       }
 
       window.location.href = data.url;
-    } catch (err) {
+    } catch {
       alert("Stripe checkout failed");
     }
   }
 
   return (
     <div className="container">
-      {/* Back Button */}
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
         <Link
           href="/"
@@ -99,16 +89,24 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={upgradeToPro}>Upgrade to Pro</button>
-      </div>
+      <button
+        onClick={upgradeToPro}
+        style={{
+          marginTop: "20px",
+          background: "#ffd000",
+          color: "#000",
+          fontWeight: 700,
+        }}
+      >
+        Upgrade to Pro
+      </button>
 
       {loading && <p>Loading…</p>}
 
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
-          <div className="content">{content}</div>
+          <pre className="content">{content}</pre>
         </div>
       )}
     </div>
