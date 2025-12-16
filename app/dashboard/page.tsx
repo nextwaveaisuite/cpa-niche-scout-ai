@@ -37,9 +37,7 @@ export default function Dashboard() {
     setLoading(false);
   }
 
-  /* ===============================
-     ADDED: COPY RESULT FUNCTION
-     =============================== */
+  /* ========= ADDED (NO STYLE CHANGES) ========= */
   function copyResult() {
     if (!content) return;
     navigator.clipboard.writeText(
@@ -47,12 +45,9 @@ export default function Dashboard() {
         ? content
         : JSON.stringify(content, null, 2)
     );
-    alert("Result copied to clipboard");
+    alert("Copied to clipboard");
   }
 
-  /* ===============================
-     ADDED: EXPORT RESULT FUNCTION
-     =============================== */
   function exportResult() {
     if (!content) return;
 
@@ -71,6 +66,7 @@ export default function Dashboard() {
 
     URL.revokeObjectURL(url);
   }
+  /* ============================================ */
 
   return (
     <div className="container">
@@ -113,11 +109,7 @@ export default function Dashboard() {
         <div className="result-box">
           <div className="section-title">
             {title}
-
-            {/* ===============================
-                ADDED: COPY + EXPORT BUTTONS
-                (NO STYLE CHANGES)
-               =============================== */}
+            {/* ADDED — inherits existing styles */}
             <div>
               <button onClick={copyResult}>Copy</button>
               <button onClick={exportResult}>Export</button>
