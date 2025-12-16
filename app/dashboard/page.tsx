@@ -96,6 +96,29 @@ export default function Dashboard() {
     URL.revokeObjectURL(url);
   }
 
+  /* ============================
+     VIDEO HOOK (CONTEXTUAL)
+     ============================ */
+  async function generateVideoHook() {
+    setLoading(true);
+
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        niche,
+        context: content,
+        mode: "video_hook",
+      }),
+    });
+
+    const json = await res.json();
+
+    setTitle("60-Second YouTube Hook");
+    setContent(json.video_hook || "No hook generated");
+    setLoading(false);
+  }
+
   return (
     <div className="container">
       {/* Back Button */}
@@ -141,6 +164,9 @@ export default function Dashboard() {
           <div style={{ marginBottom: "10px" }}>
             <button onClick={copyToClipboard}>Copy</button>
             <button onClick={exportTxt}>Export</button>
+            <button onClick={generateVideoHook}>
+              🎬 60s Video Hook
+            </button>
           </div>
 
           <div className="content">
