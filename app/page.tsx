@@ -2,10 +2,37 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main style={{ padding: 40 }}>
-      <h1>CPA Niche Scout AI</h1>
-      <p>Find profitable CPA niches in minutes.</p>
-      <Link href="/dashboard">Go to Dashboard →</Link>
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "40px",
+      }}
+    >
+      <div>
+        <h1>CPA Niche Scout AI</h1>
+        <p style={{ marginBottom: "24px", color: "#d1fae5" }}>
+          Find profitable CPA niches in minutes.
+        </p>
+
+        <Link
+          href="/dashboard"
+          style={{
+            display: "inline-block",
+            background: "#00ff9c",
+            color: "#0b0f14",
+            padding: "14px 22px",
+            borderRadius: "6px",
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          Go to Dashboard →
+        </Link>
+      </div>
     </main>
   );
 }
