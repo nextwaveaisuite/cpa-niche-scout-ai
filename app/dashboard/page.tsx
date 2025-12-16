@@ -53,9 +53,30 @@ export default function Dashboard() {
   }
 
   async function upgradeToPro() {
-    const res = await fetch("/api/checkout", { method: "POST" });
-    const data = await res.json();
-    if (data.url) window.location.href = data.url;
+    try {
+      console.log("Upgrade clicked");
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        alert("Stripe checkout failed");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Stripe response:", data);
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        alert("No Stripe URL returned");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Upgrade error");
+    }
   }
 
   return (
@@ -88,7 +109,12 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <button onClick={upgradeToPro} style={{ marginTop: "20px" }}>
+      {/* 🔒 Upgrade */}
+      <button
+        type="button"
+        onClick={upgradeToPro}
+        style={{ marginTop: "20px" }}
+      >
         Upgrade to Pro
       </button>
 
