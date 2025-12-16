@@ -1,32 +1,17 @@
 import { NextResponse } from "next/server";
-import { callFull } from "../../../lib/openai/client";
+import { callFull } from "@/lib/openai/client";
 
-export const runtime = "nodejs"; // ✅ IMPORTANT
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  try {
-    const { niche } = await req.json();
+  const { niche } = await req.json();
 
-    if (!niche) {
-      return NextResponse.json({ error: "Niche required" }, { status: 400 });
-    }
+  const text = await callFull(`
+List CPA offer types, payout ranges, and funnels for:
+${niche}
+`);
 
-    const prompt = `
-You are a CPA expert.
-For the niche "${niche}", provide:
-- Best CPA offer types
-- Traffic sources
-- Funnel angles
-- Compliance notes
-`;
-
-    const result = await callFull(prompt);
-
-    return NextResponse.json({ niche, offers: result });
-  } catch {
-    return NextResponse.json(
-      { error: "Offer analysis failed" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    offers: text
+  });
 }
