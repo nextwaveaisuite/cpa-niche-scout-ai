@@ -2,41 +2,38 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
 export async function POST() {
   try {
-    if (!process.env.STRIPE_SECRET_KEY)
-      throw new Error("Missing STRIPE_SECRET_KEY");
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    const priceId = process.env.STRIPE_PRICE_ID;
 
-    if (!process.env.STRIPE_PRICE_ID)
-      throw new Error("Missing STRIPE_PRICE_ID");
-
-    if (!process.env.NEXT_PUBLIC_SITE_URL)
-      throw new Error("Missing NEXT_PUBLIC_SITE_URL");
+    if (!siteUrl || !priceId) {
+      throw new Error("Missing Stripe environment variables");
+    }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID,
+          price: priceId,
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgrade=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgrade=cancel`,
+      success_url: `${siteUrl}/dashboard?upgrade=success`,
+      cancel_url: `${siteUrl}/dashboard?upgrade=cancel`,
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    console.error("STRIPE ERROR:", err.message);
+  } catch (error: any) {
+    console.error("STRIPE CHECKOUT ERROR:", error.message);
     return NextResponse.json(
-      { error: err.message },
+      { error: "Stripe checkout failed" },
       { status: 500 }
     );
   }
