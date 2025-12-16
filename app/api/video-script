@@ -1,0 +1,6 @@
+if (!IS_PRO) {
+  return NextResponse.json(
+    { error: "Pro feature. Upgrade to unlock video scripts." },
+    { status: 403 }
+  );
+}
