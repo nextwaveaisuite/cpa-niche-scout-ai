@@ -1,70 +1,120 @@
+/* Base */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: #0b0f14;
-  color: #e6e6e6;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #020617;
+  color: #e5e7eb;
 }
 
-h1, h2, h3 {
-  color: #ffffff;
-  text-align: center;
+/* Header colors */
+.header-green {
+  color: #00ff9c;
 }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
+.header-yellow {
+  color: #facc15;
+}
+
+/* Dashboard layout */
+.dash-wrap {
+  min-height: 100vh;
   padding: 40px 20px;
   text-align: center;
 }
 
-input {
+.dash-back {
+  text-align: left;
+  max-width: 960px;
+  margin: 0 auto 20px;
+}
+
+.back-link {
+  color: #00ff9c;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.dash-title {
+  margin-bottom: 8px;
+}
+
+.dash-sub {
+  color: #9ca3af;
+  margin-bottom: 24px;
+}
+
+/* Input */
+.dash-input {
   width: 100%;
   max-width: 420px;
   padding: 14px;
-  font-size: 16px;
   border-radius: 6px;
-  border: 1px solid #2a2f3a;
-  background: #111827;
-  color: #ffffff;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
   margin-bottom: 20px;
 }
 
-button {
-  background: #00ff9c;
-  color: #0b0f14;
-  border: none;
-  padding: 12px 18px;
+/* Buttons */
+.dash-actions {
+  margin-bottom: 20px;
+}
+
+.dash-actions button {
   margin: 6px;
+  padding: 10px 14px;
   border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #1cffaa;
-}
-
-.result-box {
-  background: #111827;
   border: 1px solid #1f2937;
-  border-radius: 8px;
-  padding: 24px;
-  margin-top: 30px;
+  background: #020617;
+  color: #00ff9c;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.dash-actions button:hover {
+  border-color: #00ff9c;
+}
+
+/* Loading */
+.dash-loading {
+  color: #facc15;
+  margin-top: 20px;
+}
+
+/* Result card */
+.result-card {
+  max-width: 960px;
+  margin: 30px auto 0;
+  background: #020617;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
   text-align: left;
 }
 
-.section-title {
-  color: #facc15; /* yellow */
-  margin-bottom: 10px;
-  font-size: 18px;
+.result-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #1f2937;
+  font-weight: 700;
+  color: #facc15;
 }
 
-.content {
-  white-space: pre-wrap;
+.result-content {
+  padding: 18px;
   line-height: 1.6;
-  color: #d1fae5; /* soft green */
+}
+
+.result-content p {
+  margin: 0 0 10px;
+}
+
+.result-content pre {
+  background: #020617;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  color: #e5e7eb;
 }
