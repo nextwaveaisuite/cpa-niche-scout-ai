@@ -5,7 +5,7 @@ type CreditRecord = {
 
 const DAILY_LIMIT = 10;
 
-// In-memory store (safe for Phase 1)
+// In-memory store (Phase 1 safe)
 const creditStore = new Map<string, CreditRecord>();
 
 function today() {
