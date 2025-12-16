@@ -1,42 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { NextResponse } from "next/server";
+import { callFull } from "@/lib/openai/client";
 
 export const runtime = "nodejs";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+export async function POST(req: Request) {
+  const { niche } = await req.json();
 
-export async function POST(req: NextRequest) {
-  try {
-    const { niche } = await req.json();
+  const text = await callFull(`
+Analyze the CPA viability of this niche:
+${niche}
+Provide a clear score, monetization insight, and traffic notes.
+`);
 
-    if (!niche) {
-      return NextResponse.json({ error: "Missing niche" }, { status: 400 });
-    }
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are a CPA niche analysis expert.",
-        },
-        {
-          role: "user",
-          content: `Analyze the CPA viability of this niche:\n${niche}`,
-        },
-      ],
-      max_tokens: 800,
-    });
-
-    return NextResponse.json({
-      quick_score: completion.choices[0].message.content,
-    });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    quick_score: text
+  });
 }
