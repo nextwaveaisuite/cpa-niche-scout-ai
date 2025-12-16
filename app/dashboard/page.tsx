@@ -24,11 +24,11 @@ export default function Dashboard() {
 
     const json = await res.json();
 
-    // ✅ PHASE 2: Soft Monetization Gate (LOGIC ONLY)
+    // Phase 2 + 3: Soft gate (Free vs Pro)
     if (json.error) {
-      setTitle("Limit Reached");
+      setTitle("Upgrade Required");
       setContent(
-        "⚠️ You’ve reached today’s free usage limit.\n\nUpgrade to unlock unlimited niche research, deeper insights, and advanced features."
+        "⚠️ This feature is available on Pro.\n\nUpgrade to unlock unlimited research, video scripts, and advanced tools."
       );
       setLoading(false);
       return;
@@ -42,11 +42,22 @@ export default function Dashboard() {
       json.offers ||
       json.domains ||
       json.blueprint ||
+      json.video_script ||
       json.deep_analysis ||
       "No data returned";
 
     setContent(value);
     setLoading(false);
+  }
+
+  // ✅ FULL Upgrade Function (Stripe)
+  async function goPro() {
+    const res = await fetch("/api/checkout", { method: "POST" });
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    }
   }
 
   return (
@@ -95,6 +106,14 @@ export default function Dashboard() {
         <button disabled={loading} onClick={() => run("blueprint", "Blueprint")}>
           Blueprint
         </button>
+        <button disabled={loading} onClick={() => run("video", "Video Script")}>
+          Video Script
+        </button>
+      </div>
+
+      {/* Optional Upgrade Button (logic only, style untouched) */}
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={goPro}>Upgrade to Pro</button>
       </div>
 
       {loading && <p>Loading…</p>}
