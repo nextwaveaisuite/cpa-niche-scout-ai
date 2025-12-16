@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function Dashboard() {
@@ -8,6 +8,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
+  /* ============================
+     ADDED: RESTORE SAVED SESSION
+     ============================ */
+  useEffect(() => {
+    const saved = localStorage.getItem("cpa_niche_scout_session");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setNiche(data.niche || "");
+      setTitle(data.title || "");
+      setContent(data.content || "");
+    }
+  }, []);
 
   async function run(endpoint: string, label: string) {
     setLoading(true);
@@ -35,10 +48,22 @@ export default function Dashboard() {
 
     setContent(value);
     setLoading(false);
+
+    /* ============================
+       ADDED: SAVE SESSION
+       ============================ */
+    localStorage.setItem(
+      "cpa_niche_scout_session",
+      JSON.stringify({
+        niche,
+        title: label,
+        content: value,
+      })
+    );
   }
 
   /* ============================
-     ADDED: COPY RESULT (NO UI CHANGES)
+     ADDED: COPY RESULT
      ============================ */
   function copyResult() {
     if (!content) return;
@@ -50,7 +75,7 @@ export default function Dashboard() {
   }
 
   /* ============================
-     ADDED: EXPORT RESULT (NO UI CHANGES)
+     ADDED: EXPORT RESULT
      ============================ */
   function exportResult() {
     if (!content) return;
@@ -112,8 +137,6 @@ export default function Dashboard() {
         <div className="result-box">
           <div className="section-title">
             {title}
-
-            {/* ADDED: COPY + EXPORT (inherits existing styles) */}
             <button onClick={copyResult}>Copy</button>
             <button onClick={exportResult}>Export</button>
           </div>
