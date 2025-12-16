@@ -8,9 +8,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [lastEndpoint, setLastEndpoint] = useState<string | null>(null);
 
   /* ============================
-     ADDED: RESTORE SAVED SESSION
+     RESTORE SESSION + AUTO-RUN
      ============================ */
   useEffect(() => {
     const saved = localStorage.getItem("cpa_niche_scout_session");
@@ -19,13 +20,24 @@ export default function Dashboard() {
       setNiche(data.niche || "");
       setTitle(data.title || "");
       setContent(data.content || "");
+      setLastEndpoint(data.endpoint || null);
+
+      // Auto-run last module if possible
+      if (data.niche && data.endpoint && data.label) {
+        run(data.endpoint, data.label, true);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function run(endpoint: string, label: string) {
-    setLoading(true);
-    setTitle("");
-    setContent("");
+  async function run(endpoint: string, label: string, silent = false) {
+    if (!niche) return;
+
+    if (!silent) {
+      setLoading(true);
+      setTitle("");
+      setContent("");
+    }
 
     const res = await fetch(`/api/${endpoint}`, {
       method: "POST",
@@ -34,8 +46,6 @@ export default function Dashboard() {
     });
 
     const json = await res.json();
-
-    setTitle(label);
 
     const value =
       json.quick_score ||
@@ -46,24 +56,27 @@ export default function Dashboard() {
       json.deep_analysis ||
       "No data returned";
 
+    setTitle(label);
     setContent(value);
+    setLastEndpoint(endpoint);
     setLoading(false);
 
     /* ============================
-       ADDED: SAVE SESSION
+       SAVE SESSION
        ============================ */
     localStorage.setItem(
       "cpa_niche_scout_session",
       JSON.stringify({
         niche,
-        title: label,
+        endpoint,
+        label,
         content: value,
       })
     );
   }
 
   /* ============================
-     ADDED: COPY RESULT
+     COPY RESULT (LOGIC ONLY)
      ============================ */
   function copyResult() {
     if (!content) return;
@@ -75,7 +88,7 @@ export default function Dashboard() {
   }
 
   /* ============================
-     ADDED: EXPORT RESULT
+     EXPORT RESULT (LOGIC ONLY)
      ============================ */
   function exportResult() {
     if (!content) return;
