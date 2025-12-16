@@ -10,8 +10,6 @@ export default function Dashboard() {
   const [content, setContent] = useState("");
 
   async function run(endpoint: string, label: string) {
-    if (!niche) return;
-
     setLoading(true);
     setTitle("");
     setContent("");
@@ -39,34 +37,69 @@ export default function Dashboard() {
     setLoading(false);
   }
 
+  /* ===============================
+     ADDED: COPY RESULT FUNCTION
+     =============================== */
+  function copyResult() {
+    if (!content) return;
+    navigator.clipboard.writeText(
+      typeof content === "string"
+        ? content
+        : JSON.stringify(content, null, 2)
+    );
+    alert("Result copied to clipboard");
+  }
+
+  /* ===============================
+     ADDED: EXPORT RESULT FUNCTION
+     =============================== */
+  function exportResult() {
+    if (!content) return;
+
+    const text =
+      typeof content === "string"
+        ? content
+        : JSON.stringify(content, null, 2);
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title || "result"}.txt`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <main className="dash-wrap">
-      {/* Back */}
-      <div className="dash-back">
-        <Link href="/" className="back-link">
+    <div className="container">
+      {/* Back Button */}
+      <div style={{ textAlign: "left", marginBottom: "20px" }}>
+        <Link
+          href="/"
+          style={{
+            color: "#00ff9c",
+            textDecoration: "none",
+            fontWeight: 600,
+          }}
+        >
           ← Back to Home
         </Link>
       </div>
 
-      {/* Header */}
-      <h1 className="dash-title">
-        <span className="header-green">CPA Niche Scout AI</span>
+      <h1>
+        <span className="header-green">CPA Niche</span>{" "}
+        <span className="header-yellow">Scout AI</span>
       </h1>
 
-      <p className="dash-sub">
-        Enter a niche and run instant CPA intelligence.
-      </p>
-
-      {/* Input */}
       <input
-        className="dash-input"
         placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
         value={niche}
         onChange={(e) => setNiche(e.target.value)}
       />
 
-      {/* Actions */}
-      <div className="dash-actions">
+      <div>
         <button onClick={() => run("analyze", "Analysis")}>Analyze</button>
         <button onClick={() => run("keywords", "Keywords")}>Keywords</button>
         <button onClick={() => run("offers", "Offers")}>Offers</button>
@@ -74,25 +107,26 @@ export default function Dashboard() {
         <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
       </div>
 
-      {/* Loading */}
-      {loading && <p className="dash-loading">Running analysis…</p>}
+      {loading && <p>Loading…</p>}
 
-      {/* Results */}
       {content && (
-        <section className="result-card">
-          <div className="result-header">{title}</div>
+        <div className="result-box">
+          <div className="section-title">
+            {title}
 
-          <div className="result-content">
-            {typeof content === "string" ? (
-              content.split("\n").map((line, i) => (
-                <p key={i}>{line}</p>
-              ))
-            ) : (
-              <pre>{JSON.stringify(content, null, 2)}</pre>
-            )}
+            {/* ===============================
+                ADDED: COPY + EXPORT BUTTONS
+                (NO STYLE CHANGES)
+               =============================== */}
+            <div>
+              <button onClick={copyResult}>Copy</button>
+              <button onClick={exportResult}>Export</button>
+            </div>
           </div>
-        </section>
+
+          <div className="content">{content}</div>
+        </div>
       )}
-    </main>
+    </div>
   );
 }
