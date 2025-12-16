@@ -14,8 +14,7 @@ export default function Home() {
     >
       <div style={{ maxWidth: "700px" }}>
         <h1>
-          <span className="header-green">CPA Niche</span>{" "}
-          <span className="header-yellow">Scout AI</span>
+          <span className="header-green">CPA Niche Scout AI</span>
         </h1>
 
         <p style={{ color: "#d1fae5", fontSize: "18px", marginBottom: "20px" }}>
