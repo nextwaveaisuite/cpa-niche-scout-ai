@@ -29,13 +29,14 @@ export default function Dashboard() {
         json.offers ||
         json.domains ||
         json.blueprint ||
-        json.script ||
+        json.video ||
         "No data returned";
 
       setTitle(label);
       setContent(value);
-    } catch {
-      setContent("Analysis failed");
+    } catch (e) {
+      setTitle("Error");
+      setContent("Request failed");
     }
 
     setLoading(false);
@@ -43,21 +44,26 @@ export default function Dashboard() {
 
   async function upgradeToPro() {
     try {
-      const res = await fetch("/api/checkout", { method: "POST" });
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+      });
+
       const data = await res.json();
 
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
+      if (!data.url) {
         alert("Stripe checkout failed");
+        return;
       }
-    } catch {
+
+      window.location.href = data.url;
+    } catch (err) {
       alert("Stripe checkout failed");
     }
   }
 
   return (
     <div className="container">
+      {/* Back Button */}
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
         <Link
           href="/"
