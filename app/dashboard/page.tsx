@@ -14,75 +14,59 @@ export default function Dashboard() {
     setTitle("");
     setContent("");
 
-    const res = await fetch(`/api/${endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ niche }),
-    });
+    try {
+      const res = await fetch(`/api/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ niche }),
+      });
 
-    const json = await res.json();
+      const json = await res.json();
 
-    setTitle(label);
+      const value =
+        json.quick_score ||
+        json.keywords ||
+        json.offers ||
+        json.domains ||
+        json.blueprint ||
+        json.script ||
+        "No data returned";
 
-    const value =
-      json.quick_score ||
-      json.keywords ||
-      json.offers ||
-      json.domains ||
-      json.blueprint ||
-      json.deep_analysis ||
-      "No data returned";
+      setTitle(label);
+      setContent(value);
+    } catch {
+      setContent("Analysis failed");
+    }
 
-    setContent(value);
     setLoading(false);
-  }
-
-  function copyToClipboard() {
-    navigator.clipboard.writeText(content);
-    alert("Copied to clipboard");
-  }
-
-  function exportToTxt() {
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title || "result"}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   async function upgradeToPro() {
     try {
-      console.log("Upgrade clicked");
-
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        alert("Stripe checkout failed");
-        return;
-      }
-
+      const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json();
-      console.log("Stripe response:", data);
 
-      if (data?.url) {
+      if (data.url) {
         window.location.href = data.url;
       } else {
-        alert("No Stripe URL returned");
+        alert("Stripe checkout failed");
       }
-    } catch (err) {
-      console.error(err);
-      alert("Upgrade error");
+    } catch {
+      alert("Stripe checkout failed");
     }
   }
 
   return (
     <div className="container">
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <Link href="/" style={{ color: "#00ff9c", fontWeight: 600 }}>
+        <Link
+          href="/"
+          style={{
+            color: "#00ff9c",
+            textDecoration: "none",
+            fontWeight: 600,
+          }}
+        >
           ← Back to Home
         </Link>
       </div>
@@ -104,33 +88,20 @@ export default function Dashboard() {
         <button onClick={() => run("offers", "Offers")}>Offers</button>
         <button onClick={() => run("domains", "Domains")}>Domains</button>
         <button onClick={() => run("blueprint", "Blueprint")}>Blueprint</button>
-        <button onClick={() => run("video-script", "Video Script")}>
+        <button onClick={() => run("video", "Video Script")}>
           Video Script
         </button>
       </div>
 
-      {/* 🔒 Upgrade */}
-      <button
-        type="button"
-        onClick={upgradeToPro}
-        style={{ marginTop: "20px" }}
-      >
-        Upgrade to Pro
-      </button>
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={upgradeToPro}>Upgrade to Pro</button>
+      </div>
 
       {loading && <p>Loading…</p>}
 
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button onClick={copyToClipboard}>Copy</button>
-            <button onClick={exportToTxt} style={{ marginLeft: "10px" }}>
-              Export
-            </button>
-          </div>
-
           <div className="content">{content}</div>
         </div>
       )}
