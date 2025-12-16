@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   async function run(endpoint: string, label: string) {
     setLoading(true);
-    setTitle("");
+    setTitle(label);
     setContent("");
 
     try {
@@ -23,24 +23,22 @@ export default function Dashboard() {
 
       const json = await res.json();
 
-      setTitle(label);
-
       const value =
-        json.quick_score ||
-        json.keywords ||
-        json.offers ||
-        json.domains ||
-        json.blueprint ||
-        json.script ||
-        json.deep_analysis ||
-        "No data returned";
+        json.quick_score ??
+        json.keywords ??
+        json.offers ??
+        json.domains ??
+        json.blueprint ??
+        json.video_script ??
+        json.deep_analysis ??
+        JSON.stringify(json, null, 2);
 
       setContent(value);
-    } catch (err) {
-      setContent("Error processing request.");
-    } finally {
-      setLoading(false);
+    } catch {
+      setContent("Error loading data.");
     }
+
+    setLoading(false);
   }
 
   async function upgrade() {
@@ -51,15 +49,10 @@ export default function Dashboard() {
 
   return (
     <div className="container">
-      {/* Back Button */}
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
         <Link
           href="/"
-          style={{
-            color: "#00ff9c",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
+          style={{ color: "#00ff9c", textDecoration: "none", fontWeight: 600 }}
         >
           ← Back to Home
         </Link>
@@ -87,7 +80,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div style={{ marginTop: "16px" }}>
+      <div style={{ marginTop: "20px" }}>
         <button onClick={upgrade}>Upgrade to Pro</button>
       </div>
 
@@ -96,7 +89,7 @@ export default function Dashboard() {
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
-          <div className="content">{content}</div>
+          <pre className="content">{content}</pre>
         </div>
       )}
     </div>
