@@ -13,7 +13,11 @@ export default function Home() {
       }}
     >
       <div>
-        <h1>CPA Niche Scout AI</h1>
+        <h1>
+          <span className="header-green">CPA Niche</span>{" "}
+          <span className="header-yellow">Scout AI</span>
+        </h1>
+
         <p style={{ marginBottom: "24px", color: "#d1fae5" }}>
           Find profitable CPA niches in minutes.
         </p>
