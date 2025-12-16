@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Dashboard() {
   const [niche, setNiche] = useState("");
@@ -38,7 +39,24 @@ export default function Dashboard() {
 
   return (
     <div className="container">
-      <h1>CPA Niche Scout AI</h1>
+      {/* Back Button */}
+      <div style={{ textAlign: "left", marginBottom: "20px" }}>
+        <Link
+          href="/"
+          style={{
+            color: "#00ff9c",
+            textDecoration: "none",
+            fontWeight: 600,
+          }}
+        >
+          ← Back to Home
+        </Link>
+      </div>
+
+      <h1>
+        <span className="header-green">CPA Niche</span>{" "}
+        <span className="header-yellow">Scout AI</span>
+      </h1>
 
       <input
         placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
