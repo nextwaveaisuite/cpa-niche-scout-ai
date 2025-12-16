@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { callMini } from "../../../lib/openai/client";
 
-export const runtime = "edge";
+export const runtime = "nodejs"; // ✅ IMPORTANT
 
 export async function POST(req: Request) {
   try {
