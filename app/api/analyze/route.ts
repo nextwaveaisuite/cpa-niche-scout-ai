@@ -1,25 +1,42 @@
-import { NextResponse } from "next/server";
-import { checkAndConsumeCredit } from "@/lib/credits";
+import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
 
 export const runtime = "nodejs";
 
-export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for") ||
-    req.headers.get("x-real-ip") ||
-    "anonymous";
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
-  const credit = checkAndConsumeCredit(ip);
+export async function POST(req: NextRequest) {
+  try {
+    const { niche } = await req.json();
 
-  if (!credit.allowed) {
+    if (!niche) {
+      return NextResponse.json({ error: "Missing niche" }, { status: 400 });
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a CPA niche analysis expert.",
+        },
+        {
+          role: "user",
+          content: `Analyze the CPA viability of this niche:\n${niche}`,
+        },
+      ],
+      max_tokens: 800,
+    });
+
+    return NextResponse.json({
+      quick_score: completion.choices[0].message.content,
+    });
+  } catch (err: any) {
     return NextResponse.json(
-      { error: "Daily credit limit reached. Upgrade to continue." },
-      { status: 429 }
+      { error: err.message },
+      { status: 500 }
     );
   }
-
-  const { niche } = await req.json();
-
-  // existing GPT logic below (unchanged)
-  // ...
 }
