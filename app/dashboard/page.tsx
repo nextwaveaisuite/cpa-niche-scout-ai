@@ -39,7 +39,6 @@ export default function Dashboard() {
 
   /* ============================
      READABILITY FORMATTER
-     (logic only – no styling)
      ============================ */
   function renderFormattedContent(text: string) {
     return text.split("\n").map((line, i) => {
@@ -56,7 +55,7 @@ export default function Dashboard() {
       }
 
       if (line.includes("|") && line.includes("---")) {
-        return null; // skip markdown table separators
+        return null;
       }
 
       if (line.includes("|")) {
@@ -78,6 +77,23 @@ export default function Dashboard() {
 
       return <p key={i}>{line}</p>;
     });
+  }
+
+  /* ============================
+     MICRO ACTIONS
+     ============================ */
+  function copyToClipboard() {
+    navigator.clipboard.writeText(content);
+  }
+
+  function exportTxt() {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title || "cpa-niche-result"}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -120,6 +136,13 @@ export default function Dashboard() {
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
+
+          {/* Action Buttons */}
+          <div style={{ marginBottom: "10px" }}>
+            <button onClick={copyToClipboard}>Copy</button>
+            <button onClick={exportTxt}>Export</button>
+          </div>
+
           <div className="content">
             {renderFormattedContent(content)}
           </div>
