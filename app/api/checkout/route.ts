@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -18,14 +18,15 @@ export async function POST() {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?pro=1`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=1`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?cancel=1`,
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
+  } catch (err) {
+    console.error(err);
     return NextResponse.json(
-      { error: err.message },
+      { error: "Stripe checkout failed" },
       { status: 500 }
     );
   }
