@@ -29,7 +29,6 @@ export default function Dashboard() {
       window.history.replaceState({}, "", "/dashboard");
     }
 
-    // Read credits
     const match = document.cookie.match(/cpa_credits=(\d+)/);
     if (match) setCredits(parseInt(match[1], 10));
   }, []);
@@ -95,10 +94,26 @@ export default function Dashboard() {
         Credits remaining: <strong>{credits}</strong>
       </p>
 
+      {/* 💰 Credit Buy Buttons */}
       <div style={{ marginBottom: "15px" }}>
-        <button onClick={() => buyCredits("small")}>Buy 20 Credits</button>{" "}
-        <button onClick={() => buyCredits("medium")}>Buy 50 Credits</button>{" "}
-        <button onClick={() => buyCredits("large")}>Buy 100 Credits</button>
+        <button
+          style={{ background: "#facc15", color: "#000", fontWeight: 700 }}
+          onClick={() => buyCredits("small")}
+        >
+          Buy 20 Credits
+        </button>{" "}
+        <button
+          style={{ background: "#facc15", color: "#000", fontWeight: 700 }}
+          onClick={() => buyCredits("medium")}
+        >
+          Buy 50 Credits
+        </button>{" "}
+        <button
+          style={{ background: "#facc15", color: "#000", fontWeight: 700 }}
+          onClick={() => buyCredits("large")}
+        >
+          Buy 100 Credits
+        </button>
       </div>
 
       <input
@@ -122,5 +137,5 @@ export default function Dashboard() {
       {content && <div className="result-box">{content}</div>}
     </div>
   );
-  }
-        
+      }
+      
