@@ -1,17 +1,35 @@
-import { NextResponse } from "next/server";
-import { callFull } from "@/lib/openai/client";
+import { NextRequest, NextResponse } from "next/server";
+import { isProUser } from "@/lib/pro";
+import { openai } from "@/lib/openai/client";
 
-export const runtime = "nodejs";
+export async function POST(req: NextRequest) {
+  if (!isProUser(req)) {
+    return NextResponse.json(
+      {
+        error: "pro_required",
+        message: "Video scripts are a Pro feature. Please upgrade.",
+      },
+      { status: 402 }
+    );
+  }
 
-export async function POST(req: Request) {
   const { niche } = await req.json();
 
-  const text = await callFull(`
-Create a YouTube video script that promotes a CPA offer in:
-${niche}
-`);
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: "Write a YouTube video script for this CPA niche.",
+      },
+      {
+        role: "user",
+        content: niche,
+      },
+    ],
+  });
 
   return NextResponse.json({
-    deep_analysis: text
+    video: completion.choices[0].message.content,
   });
 }
