@@ -23,33 +23,32 @@ export default function Dashboard() {
     const json = await res.json();
 
     setTitle(label);
-
-    const value =
+    setContent(
       json.quick_score ||
-      json.keywords ||
-      json.offers ||
-      json.domains ||
-      json.blueprint ||
-      json.deep_analysis ||
-      "No data returned";
+        json.keywords ||
+        json.offers ||
+        json.domains ||
+        json.blueprint ||
+        json.deep_analysis ||
+        "No data returned"
+    );
 
-    setContent(value);
     setLoading(false);
   }
 
-  async function upgradeToPro() {
-    try {
-      const res = await fetch("/api/checkout", { method: "POST" });
-      const data = await res.json();
+  function copyResult() {
+    navigator.clipboard.writeText(content);
+    alert("Copied to clipboard");
+  }
 
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Stripe checkout failed");
-      }
-    } catch {
-      alert("Stripe checkout failed");
-    }
+  function exportResult() {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title || "result"}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -82,18 +81,34 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <button
-        onClick={upgradeToPro}
-        style={{ marginTop: "20px", background: "#00ff9c" }}
+      {/* 🔥 STRIPE FIX — NORMAL LINK */}
+      <a
+        href="/api/checkout"
+        style={{
+          display: "inline-block",
+          marginTop: "20px",
+          background: "#00ff9c",
+          color: "#0b0f14",
+          padding: "12px 20px",
+          borderRadius: "6px",
+          fontWeight: 600,
+          textDecoration: "none",
+        }}
       >
         Upgrade to Pro
-      </button>
+      </a>
 
       {loading && <p>Loading…</p>}
 
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
+
+          <div style={{ marginBottom: "10px" }}>
+            <button onClick={copyResult}>Copy</button>
+            <button onClick={exportResult}>Export</button>
+          </div>
+
           <div className="content">{content}</div>
         </div>
       )}
