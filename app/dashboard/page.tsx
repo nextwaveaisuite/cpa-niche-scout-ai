@@ -8,140 +8,101 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [credits, setCredits] = useState<number | null>(null);
+  const [credits, setCredits] = useState<number>(0);
 
-  // 🔑 Pro persistence (already confirmed)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Pro persistence
     if (params.get("upgrade") === "success") {
       document.cookie = "cpa_pro=1; path=/; max-age=31536000";
+    }
+
+    // Credit top-up return
+    const added = params.get("credits");
+    if (added) {
+      const match = document.cookie.match(/cpa_credits=(\d+)/);
+      const current = match ? parseInt(match[1], 10) : 0;
+      const total = current + parseInt(added, 10);
+
+      document.cookie = `cpa_credits=${total}; path=/; max-age=2592000`;
       window.history.replaceState({}, "", "/dashboard");
     }
 
-    // Read credits cookie
+    // Read credits
     const match = document.cookie.match(/cpa_credits=(\d+)/);
-    if (match) {
-      setCredits(parseInt(match[1], 10));
-    } else {
-      // Default display before first action
-      setCredits(null);
-    }
+    if (match) setCredits(parseInt(match[1], 10));
   }, []);
 
   async function run(endpoint: string, label: string) {
-    if (!niche) {
-      alert("Please enter a niche first");
-      return;
-    }
+    if (!niche) return alert("Enter a niche first");
 
     setLoading(true);
     setTitle("");
     setContent("");
 
-    try {
-      const res = await fetch(`/api/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ niche }),
-      });
+    const res = await fetch(`/api/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ niche }),
+    });
 
-      const json = await res.json();
+    const json = await res.json();
 
-      if (json?.error) {
-        alert(json.message);
-        setLoading(false);
-        return;
-      }
+    if (json.error) {
+      alert(json.message);
+      setLoading(false);
+      return;
+    }
 
-      setTitle(label);
-
-      const value =
-        json.quick_score ||
+    setTitle(label);
+    setContent(
+      json.quick_score ||
         json.keywords ||
         json.offers ||
         json.domains ||
         json.blueprint ||
-        json.video ||
-        json.deep_analysis ||
-        "No data returned";
+        json.video
+    );
 
-      setContent(value);
-
-      // Refresh credits after action
-      const match = document.cookie.match(/cpa_credits=(\d+)/);
-      if (match) {
-        setCredits(parseInt(match[1], 10));
-      }
-
-    } catch {
-      setContent("Error loading data");
-    }
+    const match = document.cookie.match(/cpa_credits=(\d+)/);
+    if (match) setCredits(parseInt(match[1], 10));
 
     setLoading(false);
   }
 
-  function copyToClipboard() {
-    navigator.clipboard.writeText(content);
-    alert("Copied to clipboard");
-  }
+  async function buyCredits(pack: string) {
+    const res = await fetch("/api/credits/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pack }),
+    });
 
-  function exportToTxt() {
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title || "output"}.txt`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  }
-
-  async function upgradeToPro() {
-    try {
-      const res = await fetch("/api/checkout", { method: "POST" });
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Stripe checkout failed");
-      }
-    } catch {
-      alert("Stripe checkout failed");
-    }
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
   }
 
   return (
     <div className="container">
-      <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <Link
-          href="/"
-          style={{
-            color: "#00ff9c",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
-          ← Back to Home
-        </Link>
-      </div>
+      <Link href="/">← Back to Home</Link>
 
       <h1>
         <span className="header-green">CPA Niche</span>{" "}
         <span className="header-yellow">Scout AI</span>
       </h1>
 
-      {/* 🔢 Credit Display */}
-      <p style={{ opacity: 0.85, marginBottom: "10px" }}>
-        Credits remaining:{" "}
-        <strong>
-          {credits !== null ? credits : "—"}
-        </strong>
+      <p>
+        Credits remaining: <strong>{credits}</strong>
       </p>
 
+      <div style={{ marginBottom: "15px" }}>
+        <button onClick={() => buyCredits("small")}>Buy 20 Credits</button>{" "}
+        <button onClick={() => buyCredits("medium")}>Buy 50 Credits</button>{" "}
+        <button onClick={() => buyCredits("large")}>Buy 100 Credits</button>
+      </div>
+
       <input
-        placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
+        placeholder="Enter a niche"
         value={niche}
         onChange={(e) => setNiche(e.target.value)}
       />
@@ -157,25 +118,9 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={upgradeToPro}>Upgrade to Pro</button>
-      </div>
-
       {loading && <p>Loading…</p>}
-
-      {content && (
-        <div className="result-box">
-          <div className="section-title">{title}</div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button onClick={copyToClipboard}>Copy</button>{" "}
-            <button onClick={exportToTxt}>Export</button>
-          </div>
-
-          <div className="content">{content}</div>
-        </div>
-      )}
+      {content && <div className="result-box">{content}</div>}
     </div>
   );
-      }
-    
+  }
+        
