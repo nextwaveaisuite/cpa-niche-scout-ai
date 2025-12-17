@@ -17,21 +17,13 @@ function getSiteUrl() {
 
 export async function POST() {
   try {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error("Missing STRIPE_SECRET_KEY");
-    }
-
-    if (!process.env.STRIPE_PRICE_ID) {
-      throw new Error("Missing STRIPE_PRICE_ID");
-    }
-
     const SITE_URL = getSiteUrl();
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID,
+          price: process.env.STRIPE_PRICE_ID!,
           quantity: 1,
         },
       ],
@@ -56,4 +48,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-          }
+      }
