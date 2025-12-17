@@ -1,35 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isProUser } from "@/lib/pro";
 import { openai } from "@/lib/openai/client";
+import { checkCredits, deductCredits } from "@/lib/credits";
 
 export async function POST(req: NextRequest) {
-  if (!isProUser(req)) {
-    return NextResponse.json(
-      {
-        error: "pro_required",
-        message: "Video scripts are a Pro feature. Please upgrade.",
-      },
-      { status: 402 }
-    );
-  }
+  const credit = checkCredits(req, 3);
+  if (!credit.allowed) return credit.response!;
 
   const { niche } = await req.json();
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: [
-      {
-        role: "system",
-        content: "Write a YouTube video script for this CPA niche.",
-      },
-      {
-        role: "user",
-        content: niche,
-      },
+      { role: "system", content: "Write a YouTube video script." },
+      { role: "user", content: niche },
     ],
   });
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     video: completion.choices[0].message.content,
   });
+
+  deductCredits(res, req, 3);
+  return res;
 }
