@@ -9,7 +9,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 export async function POST() {
   try {
-    // 🔒 Hard validation — fail loudly
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error("Missing STRIPE_SECRET_KEY");
     }
@@ -23,7 +22,7 @@ export async function POST() {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription", // MUST match your price type
+      mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
@@ -36,11 +35,11 @@ export async function POST() {
     });
 
     if (!session.url) {
-      throw new Error("Stripe session created but no redirect URL returned");
+      throw new Error("Stripe session created but no URL returned");
     }
 
-    // ✅ THIS IS THE CRITICAL PART — REDIRECT
-    return NextResponse.redirect(session.url, { status: 303 });
+    // 🔑 RETURN URL — DO NOT REDIRECT HERE
+    return NextResponse.json({ url: session.url });
 
   } catch (error: any) {
     console.error("🔥 STRIPE CHECKOUT ERROR:", error.message);
