@@ -3,33 +3,53 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: "2023-10-16",
+});
+
 export async function POST() {
   try {
-    // 🔑 STRIPE CONFIG — USE ENV VARS ONLY
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: "2023-10-16",
-    });
+    // 🔒 Hard validation — fail loudly
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error("Missing STRIPE_SECRET_KEY");
+    }
+
+    if (!process.env.STRIPE_PRICE_ID) {
+      throw new Error("Missing STRIPE_PRICE_ID");
+    }
+
+    if (!process.env.NEXT_PUBLIC_SITE_URL) {
+      throw new Error("Missing NEXT_PUBLIC_SITE_URL");
+    }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: "subscription", // MUST match your price type
       payment_method_types: ["card"],
-
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!, // MUST be price_xxx
+          price: process.env.STRIPE_PRICE_ID,
           quantity: 1,
         },
       ],
-
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgrade=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgrade=cancel`,
     });
 
-    return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    console.error("STRIPE CHECKOUT ERROR:", err.message);
+    if (!session.url) {
+      throw new Error("Stripe session created but no redirect URL returned");
+    }
+
+    // ✅ THIS IS THE CRITICAL PART — REDIRECT
+    return NextResponse.redirect(session.url, { status: 303 });
+
+  } catch (error: any) {
+    console.error("🔥 STRIPE CHECKOUT ERROR:", error.message);
+
     return NextResponse.json(
-      { error: "Stripe checkout failed", details: err.message },
+      {
+        error: "Stripe checkout failed",
+        message: error.message,
+      },
       { status: 500 }
     );
   }
