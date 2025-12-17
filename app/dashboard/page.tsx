@@ -10,51 +10,81 @@ export default function Dashboard() {
   const [content, setContent] = useState("");
 
   async function run(endpoint: string, label: string) {
+    if (!niche) return alert("Please enter a niche");
+
     setLoading(true);
-    setTitle("");
+    setTitle(label);
     setContent("");
 
-    const res = await fetch(`/api/${endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ niche }),
-    });
+    try {
+      const res = await fetch(`/api/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ niche }),
+      });
 
-    const json = await res.json();
+      const json = await res.json();
 
-    setTitle(label);
-    setContent(
-      json.quick_score ||
+      const value =
+        json.quick_score ||
         json.keywords ||
         json.offers ||
         json.domains ||
         json.blueprint ||
+        json.script ||
         json.deep_analysis ||
-        "No data returned"
-    );
+        "No data returned";
 
-    setLoading(false);
+      setContent(value);
+    } catch (err) {
+      setContent("Error loading data");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function copyResult() {
+  async function upgradeToPro() {
+    try {
+      const res = await fetch("/api/checkout", { method: "POST" });
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Stripe checkout failed");
+      }
+    } catch {
+      alert("Stripe checkout failed");
+    }
+  }
+
+  function copyToClipboard() {
     navigator.clipboard.writeText(content);
     alert("Copied to clipboard");
   }
 
-  function exportResult() {
+  function exportToTxt() {
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${title || "result"}.txt`;
+    a.download = `${title || "export"}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   return (
     <div className="container">
+      {/* Back Button */}
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <Link href="/" style={{ color: "#00ff9c", fontWeight: 600 }}>
+        <Link
+          href="/"
+          style={{
+            color: "#00ff9c",
+            textDecoration: "none",
+            fontWeight: 600,
+          }}
+        >
           ← Back to Home
         </Link>
       </div>
@@ -81,22 +111,9 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* 🔥 STRIPE FIX — NORMAL LINK */}
-      <a
-        href="/api/checkout"
-        style={{
-          display: "inline-block",
-          marginTop: "20px",
-          background: "#00ff9c",
-          color: "#0b0f14",
-          padding: "12px 20px",
-          borderRadius: "6px",
-          fontWeight: 600,
-          textDecoration: "none",
-        }}
-      >
-        Upgrade to Pro
-      </a>
+      <div style={{ marginTop: "16px" }}>
+        <button onClick={upgradeToPro}>Upgrade to Pro</button>
+      </div>
 
       {loading && <p>Loading…</p>}
 
@@ -104,12 +121,12 @@ export default function Dashboard() {
         <div className="result-box">
           <div className="section-title">{title}</div>
 
-          <div style={{ marginBottom: "10px" }}>
-            <button onClick={copyResult}>Copy</button>
-            <button onClick={exportResult}>Export</button>
-          </div>
+          <pre className="content">{content}</pre>
 
-          <div className="content">{content}</div>
+          <div style={{ marginTop: "12px" }}>
+            <button onClick={copyToClipboard}>Copy</button>{" "}
+            <button onClick={exportToTxt}>Export</button>
+          </div>
         </div>
       )}
     </div>
