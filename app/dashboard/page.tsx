@@ -10,10 +10,13 @@ export default function Dashboard() {
   const [content, setContent] = useState("");
 
   async function run(endpoint: string, label: string) {
-    if (!niche) return alert("Please enter a niche");
+    if (!niche) {
+      alert("Please enter a niche first");
+      return;
+    }
 
     setLoading(true);
-    setTitle(label);
+    setTitle("");
     setContent("");
 
     try {
@@ -25,22 +28,41 @@ export default function Dashboard() {
 
       const json = await res.json();
 
+      setTitle(label);
+
       const value =
         json.quick_score ||
         json.keywords ||
         json.offers ||
         json.domains ||
         json.blueprint ||
-        json.script ||
+        json.video ||
         json.deep_analysis ||
         "No data returned";
 
       setContent(value);
     } catch (err) {
       setContent("Error loading data");
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
+  }
+
+  function copyToClipboard() {
+    navigator.clipboard.writeText(content);
+    alert("Copied to clipboard");
+  }
+
+  function exportToTxt() {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title || "output"}.txt`;
+    a.click();
+
+    URL.revokeObjectURL(url);
   }
 
   async function upgradeToPro() {
@@ -56,21 +78,6 @@ export default function Dashboard() {
     } catch {
       alert("Stripe checkout failed");
     }
-  }
-
-  function copyToClipboard() {
-    navigator.clipboard.writeText(content);
-    alert("Copied to clipboard");
-  }
-
-  function exportToTxt() {
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title || "export"}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   return (
@@ -111,7 +118,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div style={{ marginTop: "16px" }}>
+      <div style={{ marginTop: "20px" }}>
         <button onClick={upgradeToPro}>Upgrade to Pro</button>
       </div>
 
@@ -121,12 +128,12 @@ export default function Dashboard() {
         <div className="result-box">
           <div className="section-title">{title}</div>
 
-          <pre className="content">{content}</pre>
-
-          <div style={{ marginTop: "12px" }}>
+          <div style={{ marginBottom: "10px" }}>
             <button onClick={copyToClipboard}>Copy</button>{" "}
             <button onClick={exportToTxt}>Export</button>
           </div>
+
+          <div className="content">{content}</div>
         </div>
       )}
     </div>
