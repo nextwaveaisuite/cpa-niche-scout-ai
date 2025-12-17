@@ -1,18 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { callMini } from "@/lib/openai/client";
+import { checkUsage, incrementUsage } from "@/lib/usage";
 
 export const runtime = "nodejs";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const usage = checkUsage(req);
+  if (!usage.allowed) return usage.response!;
+
   const { niche } = await req.json();
 
-  const text = await callMini(`
-Generate high-intent CPA keywords for:
-${niche}
-Format as a clean list.
-`);
+  const result = await callMini(
+    `Generate buyer-intent CPA keywords for the niche "${niche}".`
+  );
 
-  return NextResponse.json({
-    keywords: text
-  });
+  const res = NextResponse.json({ keywords: result });
+  incrementUsage(res, req);
+  return res;
 }
