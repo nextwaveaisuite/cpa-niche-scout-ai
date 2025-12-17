@@ -7,7 +7,7 @@ export async function POST() {
   try {
     // 🔑 STRIPE SETUP — PASTE YOUR VALUES BELOW
     const stripe = new Stripe(
-      "🟨🟨🟨 PASTE_STRIPE_SECRET_KEY_HERE 🟨🟨🟨",
+      "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",
       {
         apiVersion: "2023-10-16",
       }
@@ -18,14 +18,14 @@ export async function POST() {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: "🟨🟨🟨 PASTE_STRIPE_PRICE_ID_HERE 🟨🟨🟨",
+          price: "price_1Sccn5LwgVcdXSUH3WBX4gSp",
           quantity: 1,
         },
       ],
       success_url:
-        "🟨🟨🟨 https://cpanichescoutai.nextwaveaisuite.com/dashboard?upgraded=1 🟨🟨🟨",
+        "https://cpanichescoutai.nextwaveaisuite.com/dashboard?upgraded=1",
       cancel_url:
-        "🟨🟨🟨 https://cpanichescoutai.nextwaveaisuite.com/dashboard?cancelled=1 🟨🟨🟨",
+        "https://cpanichescoutai.nextwaveaisuite.com/dashboard?cancelled=1",
     });
 
     return NextResponse.json({ url: session.url });
