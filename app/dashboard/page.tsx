@@ -8,13 +8,23 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [credits, setCredits] = useState<number | null>(null);
 
-  // 🔑 Phase 2: Set Pro cookie after Stripe success
+  // 🔑 Pro persistence (already confirmed)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("upgrade") === "success") {
       document.cookie = "cpa_pro=1; path=/; max-age=31536000";
       window.history.replaceState({}, "", "/dashboard");
+    }
+
+    // Read credits cookie
+    const match = document.cookie.match(/cpa_credits=(\d+)/);
+    if (match) {
+      setCredits(parseInt(match[1], 10));
+    } else {
+      // Default display before first action
+      setCredits(null);
     }
   }, []);
 
@@ -37,7 +47,7 @@ export default function Dashboard() {
 
       const json = await res.json();
 
-      if (json?.error === "pro_required") {
+      if (json?.error) {
         alert(json.message);
         setLoading(false);
         return;
@@ -56,6 +66,13 @@ export default function Dashboard() {
         "No data returned";
 
       setContent(value);
+
+      // Refresh credits after action
+      const match = document.cookie.match(/cpa_credits=(\d+)/);
+      if (match) {
+        setCredits(parseInt(match[1], 10));
+      }
+
     } catch {
       setContent("Error loading data");
     }
@@ -115,6 +132,14 @@ export default function Dashboard() {
         <span className="header-yellow">Scout AI</span>
       </h1>
 
+      {/* 🔢 Credit Display */}
+      <p style={{ opacity: 0.85, marginBottom: "10px" }}>
+        Credits remaining:{" "}
+        <strong>
+          {credits !== null ? credits : "—"}
+        </strong>
+      </p>
+
       <input
         placeholder="Enter a niche (e.g. Alcohol Rehabilitation)"
         value={niche}
@@ -152,5 +177,5 @@ export default function Dashboard() {
       )}
     </div>
   );
-                    }
+      }
     
