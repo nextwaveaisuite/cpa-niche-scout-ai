@@ -1,14 +1,12 @@
 import { NextRequest } from "next/server";
 
 /**
- * Phase 1: Pro gating placeholder
+ * Phase 2: Pro persistence via cookie
  * 
- * This will later be connected to:
- * - Stripe webhook
- * - User session
- * - Database flag
+ * Cookie is set client-side after successful Stripe checkout.
+ * Later replaced by webhook + DB.
  */
-export function isProUser(_req: NextRequest): boolean {
-  // Phase 1: no auth yet → always false
-  return false;
+export function isProUser(req: NextRequest): boolean {
+  const cookie = req.cookies.get("cpa_pro");
+  return cookie?.value === "1";
 }
