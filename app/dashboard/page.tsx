@@ -22,16 +22,17 @@ export default function Dashboard() {
 
     const json = await res.json();
 
+    setTitle(label);
+
     const value =
       json.quick_score ||
       json.keywords ||
       json.offers ||
       json.domains ||
       json.blueprint ||
-      json.script ||
+      json.deep_analysis ||
       "No data returned";
 
-    setTitle(label);
     setContent(value);
     setLoading(false);
   }
@@ -41,12 +42,11 @@ export default function Dashboard() {
       const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json();
 
-      if (!data.url) {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
         alert("Stripe checkout failed");
-        return;
       }
-
-      window.location.href = data.url;
     } catch {
       alert("Stripe checkout failed");
     }
@@ -55,14 +55,7 @@ export default function Dashboard() {
   return (
     <div className="container">
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <Link
-          href="/"
-          style={{
-            color: "#00ff9c",
-            textDecoration: "none",
-            fontWeight: 600,
-          }}
-        >
+        <Link href="/" style={{ color: "#00ff9c", fontWeight: 600 }}>
           ← Back to Home
         </Link>
       </div>
@@ -91,12 +84,7 @@ export default function Dashboard() {
 
       <button
         onClick={upgradeToPro}
-        style={{
-          marginTop: "20px",
-          background: "#ffd000",
-          color: "#000",
-          fontWeight: 700,
-        }}
+        style={{ marginTop: "20px", background: "#00ff9c" }}
       >
         Upgrade to Pro
       </button>
@@ -106,7 +94,7 @@ export default function Dashboard() {
       {content && (
         <div className="result-box">
           <div className="section-title">{title}</div>
-          <pre className="content">{content}</pre>
+          <div className="content">{content}</div>
         </div>
       )}
     </div>
