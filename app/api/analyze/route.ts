@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callFull } from "@/lib/openai/client";
-import { checkUsage, incrementUsage } from "@/lib/usage";
+import { checkCredits, deductCredits } from "@/lib/credits";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  const usage = checkUsage(req);
-  if (!usage.allowed) return usage.response!;
+  const credit = checkCredits(req, 1);
+  if (!credit.allowed) return credit.response!;
 
   const { niche } = await req.json();
 
@@ -15,6 +15,6 @@ export async function POST(req: NextRequest) {
   );
 
   const res = NextResponse.json({ quick_score: result });
-  incrementUsage(res, req);
+  deductCredits(res, req, 1);
   return res;
 }
