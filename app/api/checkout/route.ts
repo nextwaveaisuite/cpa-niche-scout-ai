@@ -7,10 +7,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-export async function POST() {
+export async function GET() {
   try {
     const session = await stripe.checkout.sessions.create({
-      mode: "payment", // ✅ FIX: one-time payment (NOT subscription)
+      mode: "payment", // ✅ one-time payment
       payment_method_types: ["card"],
       line_items: [
         {
@@ -19,15 +19,13 @@ export async function POST() {
         },
       ],
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?upgraded=1`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard?canceled=1`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
     });
 
-    return NextResponse.json({ url: session.url });
+    // 🔥 THIS is the key fix
+    return NextResponse.redirect(session.url!, 303);
   } catch (err: any) {
-    console.error("Stripe checkout error:", err.message);
-    return NextResponse.json(
-      { error: "Stripe checkout failed" },
-      { status: 500 }
-    );
+    console.error("Stripe error:", err);
+    return new NextResponse("Stripe checkout failed", { status: 500 });
   }
 }
