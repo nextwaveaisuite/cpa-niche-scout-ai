@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Dashboard() {
@@ -8,6 +8,15 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
+  // 🔑 Phase 2: Set Pro cookie after Stripe success
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgrade") === "success") {
+      document.cookie = "cpa_pro=1; path=/; max-age=31536000";
+      window.history.replaceState({}, "", "/dashboard");
+    }
+  }, []);
 
   async function run(endpoint: string, label: string) {
     if (!niche) {
@@ -28,6 +37,12 @@ export default function Dashboard() {
 
       const json = await res.json();
 
+      if (json?.error === "pro_required") {
+        alert(json.message);
+        setLoading(false);
+        return;
+      }
+
       setTitle(label);
 
       const value =
@@ -41,7 +56,7 @@ export default function Dashboard() {
         "No data returned";
 
       setContent(value);
-    } catch (err) {
+    } catch {
       setContent("Error loading data");
     }
 
@@ -70,25 +85,18 @@ export default function Dashboard() {
       const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json();
 
-      if (!res.ok) {
-        console.error("Stripe error:", data);
-        alert(data?.stripeMessage || "Stripe checkout failed");
-        return;
-      }
-
       if (data.url) {
         window.location.href = data.url;
       } else {
         alert("Stripe checkout failed");
       }
-    } catch (err) {
+    } catch {
       alert("Stripe checkout failed");
     }
   }
 
   return (
     <div className="container">
-      {/* Back Button */}
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
         <Link
           href="/"
@@ -144,5 +152,5 @@ export default function Dashboard() {
       )}
     </div>
   );
-    }
+                    }
     
