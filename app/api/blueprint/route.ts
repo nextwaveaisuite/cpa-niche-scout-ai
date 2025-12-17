@@ -1,18 +1,36 @@
-import { NextResponse } from "next/server";
-import { callFull } from "@/lib/openai/client";
+import { NextRequest, NextResponse } from "next/server";
+import { isProUser } from "@/lib/pro";
+import { openai } from "@/lib/openai/client";
 
-export const runtime = "nodejs";
+export async function POST(req: NextRequest) {
+  if (!isProUser(req)) {
+    return NextResponse.json(
+      {
+        error: "pro_required",
+        message: "Blueprints are a Pro feature. Please upgrade.",
+      },
+      { status: 402 }
+    );
+  }
 
-export async function POST(req: Request) {
   const { niche } = await req.json();
 
-  const text = await callFull(`
-Create a CPA website blueprint for:
-${niche}
-Include pages, funnels, and traffic plan.
-`);
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "Create a CPA monetization blueprint including funnel, traffic, and content.",
+      },
+      {
+        role: "user",
+        content: niche,
+      },
+    ],
+  });
 
   return NextResponse.json({
-    blueprint: text
+    blueprint: completion.choices[0].message.content,
   });
 }
