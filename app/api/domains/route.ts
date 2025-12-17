@@ -1,17 +1,35 @@
-import { NextResponse } from "next/server";
-import { callMini } from "@/lib/openai/client";
+import { NextRequest, NextResponse } from "next/server";
+import { isProUser } from "@/lib/pro";
+import { openai } from "@/lib/openai/client";
 
-export const runtime = "nodejs";
+export async function POST(req: NextRequest) {
+  if (!isProUser(req)) {
+    return NextResponse.json(
+      {
+        error: "pro_required",
+        message: "Domain ideas are a Pro feature. Please upgrade.",
+      },
+      { status: 402 }
+    );
+  }
 
-export async function POST(req: Request) {
   const { niche } = await req.json();
 
-  const text = await callMini(`
-Suggest brandable expired-style domains for:
-${niche}
-`);
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: "Generate brandable domain names for this niche.",
+      },
+      {
+        role: "user",
+        content: niche,
+      },
+    ],
+  });
 
   return NextResponse.json({
-    domains: text
+    domains: completion.choices[0].message.content,
   });
 }
