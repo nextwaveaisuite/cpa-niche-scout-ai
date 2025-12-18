@@ -1,40 +1,42 @@
 export default function RefundsPage() {
   return (
-    <main style={{ maxWidth: "900px", margin: "60px auto", padding: "20px" }}>
+    <main style={{ maxWidth: "1000px", margin: "70px auto", padding: "30px" }}>
       <h1>Refund Policy</h1>
 
       <p>
-        CPA Niche Scout AI provides immediate access to digital features upon
-        purchase. Please read this policy carefully before completing a payment.
+        CPA Niche Scout AI provides digital software services with immediate
+        access upon purchase. This policy governs refund eligibility.
       </p>
 
-      <h2>Eligibility for Refunds</h2>
+      <h2>1. Refund Eligibility</h2>
       <p>
-        Refund requests may be considered within <strong>7 days</strong> of
-        purchase only if the software does not function as described.
+        Refund requests may be reviewed within seven (7) days of purchase if the
+        service is demonstrably non-functional or materially different from its
+        described operation.
       </p>
 
-      <h2>Non-Refundable Use</h2>
+      <h2>2. Non-Refundable Use</h2>
       <p>
         Due to the digital nature of the service, refunds are generally not
-        provided once credits, Pro access, or features have been used.
+        available once credits, Pro access, or features have been accessed or
+        consumed.
       </p>
 
-      <h2>Abuse Prevention</h2>
+      <h2>3. Abuse Prevention</h2>
       <p>
-        We reserve the right to deny refund requests in cases of excessive usage,
-        abuse, or attempts to exploit the system.
+        Refunds may be denied where excessive usage, abuse, or attempts to
+        circumvent system limitations are detected.
       </p>
 
-      <h2>How to Request a Refund</h2>
+      <h2>4. Refund Requests</h2>
       <p>
-        To request a refund, contact us at:
+        All refund inquiries must be submitted to:
         <br />
         <strong>support@nextwaveaisuite.com</strong>
       </p>
 
       <p>
-        Refund decisions are made at our discretion and are final.
+        All refund determinations are final and made at our sole discretion.
       </p>
     </main>
   );
