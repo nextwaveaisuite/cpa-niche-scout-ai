@@ -1,63 +1,89 @@
 export default function PrivacyPage() {
   return (
-    <main style={{ maxWidth: "900px", margin: "60px auto", padding: "20px" }}>
+    <main style={{ maxWidth: "1000px", margin: "70px auto", padding: "30px" }}>
       <h1>Privacy Policy</h1>
 
       <p>
-        CPA Niche Scout AI (“we”, “our”, or “us”) is committed to protecting your
-        privacy. This Privacy Policy explains how we collect, use, and safeguard
-        your information when you use our software.
+        CPA Niche Scout AI (“CPA Niche Scout AI”, “we”, “us”, or “our”) is committed
+        to protecting the privacy and security of users of our software platform.
+        This Privacy Policy describes how information is collected, used,
+        processed, and safeguarded when you access or use our services.
       </p>
 
-      <h2>Information We Collect</h2>
+      <h2>1. Scope of This Policy</h2>
       <p>
-        We collect only the information necessary to operate and improve the
-        service. This may include:
+        This Privacy Policy applies to all users, visitors, and customers who
+        access CPA Niche Scout AI through our website, software applications, or
+        related services.
+      </p>
+
+      <h2>2. Information We Collect</h2>
+      <p>
+        We collect information strictly necessary to operate, maintain, secure,
+        and improve the service. This may include:
       </p>
       <ul>
-        <li>Usage data related to how you interact with the software</li>
-        <li>Technical data such as browser type and device information</li>
-        <li>Payment-related metadata processed securely by Stripe</li>
+        <li>
+          Usage data such as features accessed, actions taken, and system
+          performance metrics
+        </li>
+        <li>
+          Technical data including browser type, device characteristics, and IP
+          address
+        </li>
+        <li>
+          Transaction metadata associated with payments processed by Stripe
+        </li>
       </ul>
 
       <p>
-        We do <strong>not</strong> store credit card numbers or sensitive payment
-        information on our servers.
+        CPA Niche Scout AI does <strong>not</strong> store or process full payment
+        card details. All payment transactions are securely handled by Stripe in
+        accordance with PCI-DSS standards.
       </p>
 
-      <h2>Cookies and Tracking</h2>
+      <h2>3. Cookies and Local Storage</h2>
       <p>
-        We use cookies and similar technologies to manage session state, usage
-        limits, credit balances, and Pro access. These cookies are essential to
-        the operation of the software.
+        We use cookies and similar technologies to enable essential functionality,
+        including session management, credit balances, Pro access verification,
+        and system security. These technologies are required for proper operation
+        of the software.
       </p>
 
-      <h2>How We Use Your Information</h2>
+      <h2>4. Use of Information</h2>
       <p>
-        Information collected is used solely to:
+        Information collected may be used to:
       </p>
       <ul>
-        <li>Provide and maintain the software</li>
-        <li>Process payments and upgrades</li>
-        <li>Improve performance and reliability</li>
-        <li>Prevent abuse and misuse</li>
+        <li>Provide, operate, and maintain the platform</li>
+        <li>Process payments, upgrades, and credit purchases</li>
+        <li>Detect and prevent fraud, abuse, or misuse</li>
+        <li>Improve performance, reliability, and user experience</li>
       </ul>
 
-      <h2>Data Sharing</h2>
+      <h2>5. Data Sharing and Disclosure</h2>
       <p>
-        We do not sell, rent, or share your personal information with third
-        parties for marketing purposes. Data is shared only with trusted service
-        providers strictly for operational purposes.
+        We do not sell, rent, or trade personal information. Data may be shared
+        only with trusted third-party service providers strictly for operational
+        purposes, including payment processing and infrastructure services.
       </p>
 
-      <h2>Your Consent</h2>
+      <h2>6. Data Security</h2>
       <p>
-        By using CPA Niche Scout AI, you consent to this Privacy Policy.
+        We implement reasonable administrative, technical, and organizational
+        safeguards designed to protect information against unauthorized access,
+        disclosure, alteration, or destruction.
       </p>
 
-      <h2>Contact</h2>
+      <h2>7. User Consent</h2>
       <p>
-        If you have questions about this Privacy Policy, contact us at:
+        By accessing or using CPA Niche Scout AI, you acknowledge that you have
+        read, understood, and agreed to this Privacy Policy.
+      </p>
+
+      <h2>8. Contact Information</h2>
+      <p>
+        For privacy-related inquiries, contact:
         <br />
         <strong>support@nextwaveaisuite.com</strong>
       </p>
